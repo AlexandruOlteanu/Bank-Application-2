@@ -2,11 +2,9 @@ package com.luxoft.bankapp.domain;
 
 import java.io.Serializable;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.luxoft.bankapp.email.Email;
@@ -16,21 +14,21 @@ import com.luxoft.bankapp.exceptions.ClientExistsException;
 import com.luxoft.bankapp.utils.ClientRegistrationListener;
 
 public class Bank implements Serializable {
-	
+
 	private static final long serialVersionUID = -4157871135257285214L;
-	private final Set<Client> clients = new HashSet<Client>();
-	private final ArrayList<ClientRegistrationListener> listeners = new ArrayList<ClientRegistrationListener>();
+
+	private final Set<Client> clients = new HashSet<>();
+
+	private final Set<ClientRegistrationListener> listeners = new HashSet<>();
 	private EmailService emailService;
 
 	private Client admin = new Client("Admin", Gender.MALE);
 	
 	private Client system = new Client("System", Gender.MALE);
 	
-	private int printedClients = 0;
-	private int emailedClients = 0;
-	private int debuggedClients = 0;
-	
+
 	public Bank() {
+		// Register listeners
 		listeners.add(new PrintClientListener());
 		listeners.add(new EmailNotificationListener());
 		listeners.add(new DebugListener());
@@ -48,45 +46,34 @@ public class Bank implements Serializable {
 	public void setEmailService(EmailService emailService) {
 		this.emailService = emailService;
 	}
-	
-	public int getPrintedClients() {
-		return printedClients;
+
+	public void addClient(Client client) throws ClientExistsException {
+		if (clients.contains(client)) {
+			throw new ClientExistsException("Client already exists in the bank");
+		}
+		clients.add(client);
+		notifyClientAdded(client);
 	}
 
-	public int getEmailedClients() {
-		return emailedClients;
-	}
-
-	public int getDebuggedClients() {
-		return debuggedClients;
-	}
-	
-	public void addClient(final Client client) throws ClientExistsException {
-    	if (clients.contains(client)) {
-    		throw new ClientExistsException("Client already exists into the bank");
-    	} 
-    		
-    	clients.add(client);
-        notify(client);
-	}
-	
-	private void notify(Client client) {
-        for (ClientRegistrationListener listener: listeners) {
-            listener.onClientAdded(client);
-        }
-    }
-	
 	public Set<Client> getClients() {
 		return Collections.unmodifiableSet(clients);
 	}
-	
+
 	public Client getClient(String name) {
-        for (Client client: clients)
-            if (client.getName().equals(name))
-                return client;
-        return null;
-    }
-	
+		return clients.stream()
+				.filter(c -> c.getName().equals(name))
+				.findFirst()
+				.orElse(null);
+	}
+
+	private void notifyClientAdded(Client client) {
+		for (ClientRegistrationListener listener : listeners) {
+			listener.onClientAdded(client);
+		}
+	}
+
+	/* ------------------- LISTENERS ------------------- */
+
 	class PrintClientListener implements ClientRegistrationListener, Serializable {
 		private static final long serialVersionUID = 2777987742204604236L;
 
