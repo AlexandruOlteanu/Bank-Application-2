@@ -54,11 +54,9 @@ public class Test3 {
 		Bank bank = new Bank();
 		Client client1 = new Client("Smith John", Gender.MALE); 
 		
-		Set<Account> accounts = new HashSet<Account>();
-		accounts.add(new SavingAccount(1, 1000.0));
-		accounts.add(new CheckingAccount(2, 1000.0, 100.0));
-		client1.setAccounts(accounts);
-		
+		client1.addAccount(new SavingAccount(1, 1000.0));
+		client1.addAccount(new CheckingAccount(2, 1000.0, 100.0));
+
 		BankService.addClient(bank, client1);
 		BankService.addClient(bank, client1);
 		

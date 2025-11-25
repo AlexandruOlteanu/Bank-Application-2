@@ -1,49 +1,62 @@
 package com.luxoft.bankapp.domain;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.luxoft.bankapp.utils.Params;
 
 public class Client implements Serializable {
-		
+
 	private static final long serialVersionUID = -6343841891631428291L;
+
 	private String name;
 	private Gender gender;
 	private String phoneAreaCode;
 	private String phoneNumber;
-	
-	private Set<Account> accounts = new HashSet<Account>();
 	private String city;
 
+	// Store accounts in a Set (proper requirement)
+	private final Set<Account> accounts = new HashSet<>();
+
+	/* ----------- CONSTRUCTORS ----------- */
+
 	public Client(String name, Gender gender) {
-		this(name, gender, new ArrayList<Account>());
+		this(name, gender, Collections.emptySet());
 	}
-	
+
 	public Client(String name, Gender gender, Collection<Account> accounts) {
 		this.name = name;
 		this.gender = gender;
 		this.accounts.addAll(accounts);
 	}
-	
-	public Client(String name, Gender gender, Account[] accounts){
-        this(name, gender, Arrays.asList(accounts));
-    }
-	
-	public Client(final String name, final Gender gender, Account account) {
+
+	public Client(String name, Gender gender, Account[] accounts) {
+		this(name, gender, Arrays.asList(accounts));
+	}
+
+	public Client(String name, Gender gender, Account account) {
 		this(name, gender, new Account[]{account});
 	}
-	
+
+	/* ----------- ACCOUNT METHODS ----------- */
+
+	/** Returns an unmodifiable view of accounts */
 	public Set<Account> getAccounts() {
-		return accounts;
+		return Collections.unmodifiableSet(accounts);
 	}
-	
-	public void setAccounts(Set<Account> accounts) {
-		this.accounts = accounts;
+
+	/** Add a new account */
+	public void addAccount(Account account) {
+		accounts.add(account);
+	}
+
+	/** Remove an account */
+	public void removeAccount(Account account) {
+		accounts.remove(account);
 	}
 	
 	public String getName() {
@@ -135,15 +148,15 @@ public class Client implements Serializable {
 			return false;
 		return true;
 	}
-	
+
 	public static Client parseClient(String str){
 		Params params = new Params(str.split(";"));
-		
+
         Client client = new Client(
                 params.get("name"),
                 Gender.parse(params.get("gender")),
                 AbstractAccount.parse(params));
-        
+
         client.setCity(params.get("city"));
 
         return client;

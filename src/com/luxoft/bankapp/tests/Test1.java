@@ -45,12 +45,10 @@ public class Test1 {
 	public void testClient() {
 		Client client = new Client("Smith John", Gender.MALE); 
 		
-		Set<Account> accounts = new HashSet<Account>();
 		Account savingAccount = new SavingAccount(1, 1000.0);
-		accounts.add(savingAccount);
+		client.addAccount(savingAccount);
 		Account checkingAccount = new CheckingAccount(2, 1000.0, 100.0);
-		accounts.add(checkingAccount);
-		client.setAccounts(accounts);
+		client.addAccount(checkingAccount);
 		
 		assertEquals(2, client.getAccounts().size());
 		assertEquals("Mr. Smith John", client.getClientGreeting());
@@ -61,22 +59,17 @@ public class Test1 {
 		Bank bank = new Bank();
 		Client client1 = new Client("Smith John", Gender.MALE); 
 		
-		Set<Account> accounts1 = new HashSet<Account>();
 		Account savingAccount1 = new SavingAccount(1, 1000.0);
-		accounts1.add(savingAccount1);
+		client1.addAccount(savingAccount1);
 		Account checkingAccount1 = new CheckingAccount(2, 1000.0, 100.0);
-		accounts1.add(checkingAccount1);
-		client1.setAccounts(accounts1);
-		
+		client1.addAccount(checkingAccount1);
+
 		Client client2 = new Client("Smith Michelle", Gender.FEMALE); 
 		
-		Set<Account> accounts2 = new HashSet<Account>();
 		Account savingAccount2 = new SavingAccount(3, 2000.0);
-		accounts2.add(savingAccount2);
+		client2.addAccount(savingAccount2);
 		Account checkingAccount2 = new CheckingAccount(4, 1500.0, 200.0);
-		accounts2.add(checkingAccount2);
-		
-		client2.setAccounts(accounts2);
+		client2.addAccount(checkingAccount2);
 		
 		BankService.addClient(bank, client1);
 		BankService.addClient(bank, client2);
