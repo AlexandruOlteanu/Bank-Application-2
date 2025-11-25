@@ -67,7 +67,7 @@ public class Test7 {
 	
 	@Test
 	public void testClientsByCity() {
-		Map<String, ArrayList<Client>> clientsByCity = bankReport.getClientsByCity();
+		Map<String, List<Client>> clientsByCity = bankReport.getClientsByCity();
 		
 		assertEquals(2, clientsByCity.get("New York").size());
 		assertEquals(8, clientsByCity.get("Boston").size());
