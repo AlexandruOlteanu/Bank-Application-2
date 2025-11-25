@@ -1,7 +1,21 @@
 package com.luxoft.bankapp.service;
 
-import java.util.*;
-import com.luxoft.bankapp.domain.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import com.luxoft.bankapp.domain.Account;
+import com.luxoft.bankapp.domain.Bank;
+import com.luxoft.bankapp.domain.CheckingAccount;
+import com.luxoft.bankapp.domain.Client;
 
 public class BankReport {
 
@@ -15,63 +29,77 @@ public class BankReport {
 		return bank;
 	}
 
-	/* Returns the number of bank clients */
+	/** Returns the number of bank clients */
 	public int getNumberOfClients() {
 		return bank.getClients().size();
 	}
 
-	/* Returns the total number of accounts of all bank clients */
+	/** Returns the total number of accounts for all bank clients */
 	public int getNumberOfAccounts() {
-		Set<Account> allAccounts = new HashSet<>();
+		Set<Account> accounts = new HashSet<>();
 		for (Client client : bank.getClients()) {
-			allAccounts.addAll(client.getAccounts());
+			accounts.addAll(client.getAccounts());
 		}
-		return allAccounts.size();
+		return accounts.size();
 	}
 
-	/* Returns the set of clients sorted alphabetically by name */
+	/** Returns the set of clients sorted by name */
 	public SortedSet<Client> getClientsSorted() {
-		SortedSet<Client> sorted = new TreeSet<>(Comparator.comparing(Client::getName));
-		sorted.addAll(bank.getClients());
-		return sorted;
+		SortedSet<Client> clients = new TreeSet<>(Comparator.comparing(Client::getName,
+				Comparator.nullsLast(String::compareTo)));
+		clients.addAll(bank.getClients());
+		return clients;
 	}
 
-	/* Returns the total sum of balances in all accounts */
+	/** Returns the total balance of all accounts */
 	public double getTotalSumInAccounts() {
 		double sum = 0.0;
+		Set<Account> accounts = new HashSet<>();
 		for (Client client : bank.getClients()) {
-			for (Account account : client.getAccounts()) {
-				sum += account.getBalance();
-			}
+			accounts.addAll(client.getAccounts());
 		}
-		return Math.round(sum * 100) / 100d;
+
+		for (Account account : accounts) {
+			sum += account.getBalance();
+		}
+
+		return Math.round(sum * 100.0) / 100.0;
 	}
 
-	/* Returns all accounts sorted by current balance */
+	/** Returns accounts sorted by balance */
 	public SortedSet<Account> getAccountsSortedBySum() {
-		SortedSet<Account> sorted = new TreeSet<>(
+		SortedSet<Account> result = new TreeSet<>(
 				Comparator.comparingDouble(Account::getBalance)
 		);
+
 		for (Client client : bank.getClients()) {
-			sorted.addAll(client.getAccounts());
+			result.addAll(client.getAccounts());
 		}
-		return sorted;
+
+		return result;
 	}
 
-	/* Returns the total credit sum for CheckingAccount with negative balance */
+	/**
+	 * Returns total negative balance of CheckingAccount (the credit amount)
+	 */
 	public double getBankCreditSum() {
-		double totalCredit = 0.0;
+		double result = 0.0;
+
+		Set<Account> accounts = new HashSet<>();
 		for (Client client : bank.getClients()) {
-			for (Account account : client.getAccounts()) {
-				if (account instanceof CheckingAccount && account.getBalance() < 0) {
-					totalCredit += -account.getBalance();
-				}
+			accounts.addAll(client.getAccounts());
+		}
+
+		for (Account account : accounts) {
+			if (account instanceof CheckingAccount && account.getBalance() < 0) {
+				result -= account.getBalance();
 			}
 		}
-		return Math.round(totalCredit * 100) / 100d;
+
+		return Math.round(result * 100.0) / 100.0;
 	}
 
-	/* Returns a map of Client -> Collection<Account> */
+	/** Returns a map of clients to their accounts */
 	public Map<Client, Collection<Account>> getCustomerAccounts() {
 		Map<Client, Collection<Account>> result = new HashMap<>();
 		for (Client client : bank.getClients()) {
@@ -80,25 +108,15 @@ public class BankReport {
 		return result;
 	}
 
-	/* Returns Map<City, List<Client>>, sorted by city name */
+	/** Returns a map of cities to the list of clients living there */
 	public Map<String, List<Client>> getClientsByCity() {
-		Map<String, List<Client>> result = new TreeMap<>();
+		Map<String, List<Client>> cityMap = new TreeMap<>();
 
 		for (Client client : bank.getClients()) {
 			String city = client.getCity();
-			if (city == null) {
-				city = "Unknown";
-			}
-
-			result.putIfAbsent(city, new ArrayList<>());
-			result.get(city).add(client);
+			cityMap.computeIfAbsent(city, c -> new ArrayList<>()).add(client);
 		}
 
-		// Sort clients in each city by name
-		for (List<Client> list : result.values()) {
-			list.sort(Comparator.comparing(Client::getName));
-		}
-
-		return result;
+		return cityMap;
 	}
 }
